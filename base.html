@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartCart — {% block title %}Shop{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0A0A0A;
+      --accent: #FF4D00;
+      --accent-soft: #FFF0EB;
+      --surface: #F7F6F3;
+      --card-bg: #FFFFFF;
+      --border: #E8E5DF;
+      --text-muted: #8A8680;
+      --success: #1A7F4B;
+      --success-soft: #E8F5EE;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--primary);
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4, h5, .brand {
+      font-family: 'Syne', sans-serif;
+    }
+
+    /* ── NAVBAR ──────────────────────────────────────────── */
+    .navbar-smartcart {
+      background: var(--primary);
+      padding: 0.9rem 2rem;
+      border-bottom: 3px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar-brand-custom {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #FFFFFF !important;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .navbar-brand-custom span {
+      color: var(--accent);
+    }
+
+    .nav-link-custom {
+      color: #CCCCCC !important;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-link-custom:hover {
+      color: #FFFFFF !important;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .nav-link-custom.active {
+      color: var(--accent) !important;
+    }
+
+    .btn-admin-nav {
+      background: var(--accent);
+      color: white !important;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-admin-nav:hover { opacity: 0.85; color: white !important; }
+
+    /* ── FLASH MESSAGES ──────────────────────────────────── */
+    .flash-success {
+      background: var(--success-soft);
+      border-left: 4px solid var(--success);
+      color: var(--success);
+      padding: 0.8rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* ── PAGE HEADER ─────────────────────────────────────── */
+    .page-header {
+      background: var(--primary);
+      color: white;
+      padding: 2.5rem 0 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -1px;
+    }
+
+    .page-header .breadcrumb-item,
+    .page-header .breadcrumb-item a {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    .page-header .breadcrumb-item.active { color: rgba(255,255,255,0.8); }
+
+    /* ── CARDS ───────────────────────────────────────────── */
+    .sc-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+
+    .sc-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      transform: translateY(-2px);
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────── */
+    .btn-accent {
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.2px;
+      padding: 0.55rem 1.2rem;
+      border-radius: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-accent:hover { opacity: 0.88; color: white; transform: translateY(-1px); }
+
+    .btn-outline-sc {
+      background: transparent;
+      color: var(--primary);
+      border: 1.5px solid var(--border);
+      font-weight: 500;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-sc:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    .footer-sc {
+      background: var(--primary);
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      margin-top: 4rem;
+    }
+
+    .footer-sc strong { color: var(--accent); }
+
+    /* ── BADGES ──────────────────────────────────────────── */
+    .badge-sc {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .badge-success-sc {
+      background: var(--success-soft);
+      color: var(--success);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── EMPTY STATES ────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    .fade-up-delay-1 { animation-delay: 0.05s; opacity: 0; }
+    .fade-up-delay-2 { animation-delay: 0.10s; opacity: 0; }
+    .fade-up-delay-3 { animation-delay: 0.15s; opacity: 0; }
+    .fade-up-delay-4 { animation-delay: 0.20s; opacity: 0; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar-smartcart d-flex align-items-center justify-content-between">
+    <a href="/" class="navbar-brand-custom">Smart<span>Cart</span></a>
+    <div class="d-flex align-items-center gap-2">
+      <a href="/" class="nav-link-custom {% if request.path == '/' %}active{% endif %}">
+        <i class="bi bi-grid"></i> Shop
+      </a>
+      <a href="/cart" class="nav-link-custom {% if request.path == '/cart' %}active{% endif %}">
+        <i class="bi bi-bag"></i> Cart
+      </a>
+      <a href="/orders" class="nav-link-custom {% if request.path == '/orders' %}active{% endif %}">
+        <i class="bi bi-receipt"></i> Orders
+      </a>
+      <a href="/wishlist" class="nav-link-custom {% if request.path == '/wishlist' %}active{% endif %}">
+        <i class="bi bi-heart"></i> Wishlist
+      </a>
+      <a href="/admin" class="btn-admin-nav ms-2">
+        <i class="bi bi-shield-lock"></i> Admin
+      </a>
+    </div>
+  </nav>
+
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="flash-{{ category }} fade-up">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- MAIN CONTENT -->
+  {% block content %}{% endblock %}
+
+  <!-- FOOTER -->
+  <footer class="footer-sc">
+    <strong>SmartCart</strong> &nbsp;·&nbsp; CS2005 Database Systems Project &nbsp;·&nbsp;
+    Areeba · Alishba · Azan
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

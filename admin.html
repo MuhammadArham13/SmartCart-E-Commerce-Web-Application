@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-sidebar {
+    background: var(--primary);
+    min-height: calc(100vh - 60px);
+    padding: 2rem 1.5rem;
+    position: sticky;
+    top: 60px;
+  }
+
+  .admin-sidebar h6 {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  .admin-sidebar h6:first-child { margin-top: 0; }
+
+  .admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+
+  .admin-nav-link:hover, .admin-nav-link.active {
+    background: rgba(255,255,255,0.08);
+    color: white;
+  }
+
+  .admin-nav-link.active { color: var(--accent); }
+
+  /* Stats */
+  .admin-stat {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.3rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .admin-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .icon-orange { background: var(--accent-soft); color: var(--accent); }
+  .icon-green  { background: var(--success-soft); color: var(--success); }
+  .icon-blue   { background: #EFF6FF; color: #1D4ED8; }
+  .icon-purple { background: #F5F3FF; color: #6D28D9; }
+
+  .admin-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--primary);
+  }
+
+  .admin-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Section card */
+  .admin-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .admin-section-header h5 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Add product form */
+  .add-form {
+    padding: 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .add-form .form-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.3rem;
+  }
+
+  .add-form .form-control, .add-form .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s;
+  }
+
+  .add-form .form-control:focus, .add-form .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,77,0,0.1);
+  }
+
+  /* Table */
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .admin-table th {
+    background: var(--surface);
+    padding: 0.7rem 1.2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .admin-table td {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--primary);
+  }
+
+  .admin-table tr:last-child td { border-bottom: none; }
+
+  .admin-table tr:hover td { background: var(--surface); }
+
+  .product-name-cell {
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .stock-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+
+  .stock-ok   { color: var(--success); }
+  .stock-low  { color: #D97706; }
+  .stock-none { color: #DC2626; }
+
+  .btn-del {
+    background: none;
+    border: 1.5px solid #FECACA;
+    color: #DC2626;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .btn-del:hover {
+    background: #FEE2E2;
+    border-color: #DC2626;
+  }
+
+  /* Orders table */
+  .orders-table-wrap { overflow-x: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 0;">
+  <div class="row g-0">
+
+    <!-- SIDEBAR -->
+    <div class="col-lg-2 d-none d-lg-block">
+      <div class="admin-sidebar">
+        <h6>Dashboard</h6>
+        <a href="#inventory" class="admin-nav-link active">
+          <i class="bi bi-box-seam"></i> Inventory
+        </a>
+        <a href="#orders" class="admin-nav-link">
+          <i class="bi bi-receipt"></i> Orders
+        </a>
+        <h6>Store</h6>
+        <a href="/" class="admin-nav-link">
+          <i class="bi bi-grid"></i> View Store
+        </a>
+        <a href="/orders" class="admin-nav-link">
+          <i class="bi bi-person"></i> Customer View
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="col-lg-10" style="padding: 2rem;">
+
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h2 style="font-family:'Syne',sans-serif; font-weight:800; margin:0; letter-spacing:-0.5px;">
+            Admin Dashboard
+          </h2>
+          <p style="color: var(--text-muted); font-size:0.85rem; margin:0;">
+            SmartCart Management Panel
+          </p>
+        </div>
+        <span class="badge-sc"><i class="bi bi-shield-lock me-1"></i>Admin</span>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="row g-3 mb-4 fade-up">
+        <div class="col-6 col-md-3">
+          <div class="admin-stat">
+            <div class="admin-stat-icon icon-orange">📦</div>
+            <div>
+              <div class="admin-stat-val">{{ products|length }}</div>
+              <div class="admin-stat-label">Total Products</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat">
+            <div class="admin-stat-icon icon-green">✅</div>
+            <div>
+              <div class="admin-stat-val">
+                {{ products | selectattr(4, 'gt', 0) | list | length if false else products|length }}
+              </div>
+              <div class="admin-stat-label">In Stock</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat">
+            <div class="admin-stat-icon icon-blue">📋</div>
+            <div>
+              <div class="admin-stat-val">{{ orders|length if orders else 0 }}</div>
+              <div class="admin-stat-label">Total Orders</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="admin-stat">
+            <div class="admin-stat-icon icon-purple">🏷️</div>
+            <div>
+              <div class="admin-stat-val">3</div>
+              <div class="admin-stat-label">Categories</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY SECTION -->
+      <div class="admin-section fade-up fade-up-delay-1" id="inventory">
+        <div class="admin-section-header">
+          <h5><i class="bi bi-box-seam" style="color: var(--accent);"></i> Product Inventory</h5>
+          <button class="btn-accent" style="font-size:0.82rem; padding:0.35rem 0.9rem;"
+                  onclick="document.getElementById('addForm').style.display =
+                           document.getElementById('addForm').style.display === 'none' ? 'block' : 'none'">
+            <i class="bi bi-plus"></i> Add Product
+          </button>
+        </div>
+
+        <!-- ADD PRODUCT FORM (hidden by default) -->
+        <div class="add-form" id="addForm" style="display:none;">
+          <p style="font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; margin-bottom:1rem;">
+            Add New Product
+          </p>
+          <form action="/admin/add" method="POST">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label">Product Name *</label>
+                <input type="text" name="name" class="form-control" required placeholder="e.g. Laptop Pro">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Price (Rs.) *</label>
+                <input type="number" name="price" class="form-control" required placeholder="45000" min="0">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Stock *</label>
+                <input type="number" name="stock" class="form-control" required placeholder="25" min="0">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Category ID *</label>
+                <select name="category_id" class="form-select" required>
+                  <option value="">Select...</option>
+                  <option value="1">1 - Electronics</option>
+                  <option value="2">2 - Clothing</option>
+                  <option value="3">3 - Books</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Description</label>
+                <input type="text" name="description" class="form-control" placeholder="Short description">
+              </div>
+              <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn-accent">
+                  <i class="bi bi-plus-circle me-1"></i> Save Product
+                </button>
+                <button type="button" class="btn-outline-sc"
+                        onclick="document.getElementById('addForm').style.display='none'">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- PRODUCTS TABLE -->
+        <div class="orders-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in products %}
+              {# p = (product_id, name, category_name, price, stock, description) #}
+              <tr>
+                <td style="color: var(--text-muted); font-size:0.8rem;">#{{ p[0] }}</td>
+                <td class="product-name-cell">{{ p[1] }}</td>
+                <td><span class="badge-sc">{{ p[2] }}</span></td>
+                <td style="font-family:'Syne',sans-serif; font-weight:700;">
+                  Rs. {{ "{:,.0f}".format(p[3]) }}
+                </td>
+                <td>
+                  <span class="stock-num
+                    {% if p[4] > 10 %}stock-ok
+                    {% elif p[4] > 0 %}stock-low
+                    {% else %}stock-none{% endif %}">
+                    {{ p[4] }}
+                  </span>
+                </td>
+                <td style="color: var(--text-muted); font-size:0.82rem;">
+                  {{ p[5][:40] if p[5] else '—' }}{% if p[5] and p[5]|length > 40 %}…{% endif %}
+                </td>
+                <td>
+                  <form action="/admin/delete/{{ p[0] }}" method="POST"
+                        onsubmit="return confirm('Delete {{ p[1] }}?')">
+                    <button type="submit" class="btn-del">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not products %}
+              <tr>
+                <td colspan="7" style="text-align:center; color: var(--text-muted); padding: 3rem;">
+                  No products found. Add one above.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ORDERS SECTION -->
+      <div class="admin-section fade-up fade-up-delay-2" id="orders">
+        <div class="admin-section-header">
+          <h5><i class="bi bi-receipt" style="color: var(--accent);"></i> All Customer Orders</h5>
+          <span style="font-size:0.8rem; color: var(--text-muted);">
+            {{ orders|length if orders else 0 }} total
+          </span>
+        </div>
+
+        <div class="orders-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if orders %}
+                {% for o in orders %}
+                {# o = (user_id, name, order_id, order_date, total_amount, status) #}
+                <tr>
+                  <td style="font-family:'Syne',sans-serif; font-weight:700; color: var(--accent);">
+                    #{{ o[2] }}
+                  </td>
+                  <td>{{ o[1] }}</td>
+                  <td style="color: var(--text-muted); font-size:0.82rem;">{{ o[3] }}</td>
+                  <td style="font-family:'Syne',sans-serif; font-weight:700;">
+                    Rs. {{ "{:,.0f}".format(o[4]) }}
+                  </td>
+                  <td>
+                    <span class="status-pill status-{{ o[5]|lower if o[5] else 'pending' }}"
+                          style="font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;
+                                 {% if o[5] == 'pending' %}background:#FEF3CD;color:#856404;
+                                 {% elif o[5] == 'confirmed' %}background:#D5F5E3;color:#1A7F4B;
+                                 {% else %}background:#F8D7DA;color:#842029;{% endif %}">
+                      {{ o[5]|title if o[5] else 'Pending' }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+              <tr>
+                <td colspan="5" style="text-align:center; color: var(--text-muted); padding: 3rem;">
+                  No orders yet.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /row -->
+</div>
+{% endblock %}
