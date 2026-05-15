@@ -1,1 +1,1 @@
-# DB-project
+# DB-project (e-commerce website SmartCart)
